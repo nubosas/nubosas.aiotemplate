@@ -1,10 +1,7 @@
-import enum
 import os
 
 from sqlalchemy import (
     Column,
-    DateTime,
-    ForeignKey,
     Integer,
     String
 )

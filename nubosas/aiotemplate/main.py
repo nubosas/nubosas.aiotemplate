@@ -1,4 +1,3 @@
-import asyncio
 from logging import getLogger
 
 from aiohttp import web
@@ -13,6 +12,7 @@ LOG = getLogger(__name__)
 
 async def init_db(app):
     app['engine'] = await create_engine(dsn)
+
 
 async def close_db(app):
     LOG.debug('closing engine')

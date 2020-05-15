@@ -1,0 +1,37 @@
+version: '3.4'
+
+services:
+
+  aiotemplate-db:
+    environment:
+      POSTGRES_USER: "aiotemplate"
+      POSTGRES_PASSWORD: "aiotemplate"
+      POSTGRES_DB: "aiotemplate"
+    image: postgres:12.2
+    ports:
+      - 5432:5432/tcp
+
+  aiotemplate:
+    build:
+      context: .
+      target: build-image
+    command: ["/usr/local/bin/wait-for-it.sh", "aiotemplate-db:5432", "--", "nubosas-aiotemplate"]
+    depends_on:
+      - aiotemplate-db
+    environment:
+      ENVIRONMENT: "dev"
+      DB_HOST: "aiotemplate-db"
+    links:
+      - aiotemplate-db
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+
+  aiotemplate-tests:
+    build:
+      context: .
+    environment:
+      ENVIRONMENT: "dev"
+    volumes:
+      - .:/app

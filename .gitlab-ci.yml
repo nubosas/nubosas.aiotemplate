@@ -1,0 +1,83 @@
+image: docker:dind
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - push
+
+variables:
+  PYTHON_NAMESPACE: nubosas
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE/test:$CI_COMMIT_SHA
+  CONTAINER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  CONTAINER_COMPILE_IMAGE: $CI_REGISTRY_IMAGE/compile-image:$CI_COMMIT_SHA
+  CONTAINER_LATEST_TEST_IMAGE: $CI_REGISTRY_IMAGE/test:latest
+  CONTAINER_LATEST_IMAGE: $CI_REGISTRY_IMAGE:latest
+  CONTAINER_LATEST_COMPILE_IMAGE: $CI_REGISTRY_IMAGE/compile-image:latest
+
+# --------------------------------- #
+#               BUILD               #
+# --------------------------------- #
+
+# build and push the pipeline test image
+build_image:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CONTAINER_LATEST_COMPILE_IMAGE || true
+    - docker build -t ${CONTAINER_COMPILE_IMAGE} --cache-from ${CONTAINER_LATEST_COMPILE_IMAGE} --target compile-image .
+    - docker pull $CONTAINER_LATEST_IMAGE || true
+    - docker build -t $CONTAINER_IMAGE --cache-from ${CONTAINER_COMPILE_IMAGE},${CONTAINER_LATEST_IMAGE} --target build-image .
+    - docker pull $CONTAINER_LATEST_TEST_IMAGE || true
+    - docker build -t $CONTAINER_TEST_IMAGE --cache-from ${CONTAINER_IMAGE},${CONTAINER_LATEST_TEST_IMAGE} .
+    - docker push $CONTAINER_COMPILE_IMAGE
+    - docker push $CONTAINER_IMAGE
+    - docker push $CONTAINER_TEST_IMAGE
+
+test:bandit:
+  image: ${CONTAINER_TEST_IMAGE}
+  stage: test
+  script:
+    - bandit -r ${PYTHON_NAMESPACE}
+
+test:flake8:
+  image: ${CONTAINER_TEST_IMAGE}
+  stage: test
+  script:
+    - flake8 .
+
+test:integration:
+  image: ${CONTAINER_TEST_IMAGE}
+  stage: test
+  script:
+    - pytest --junitxml=integration-report.xml tests/integration
+  artifacts:
+    reports:
+      junit: integration-report.xml
+
+test:unit:
+  image: ${CONTAINER_TEST_IMAGE}
+  stage: test
+  script:
+    - pytest --junitxml=unit-report.xml tests/unit
+  artifacts:
+    reports:
+      junit: unit-report.xml
+
+push_image:
+  stage: push
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CONTAINER_COMPILE_IMAGE
+    - docker tag $CONTAINER_COMPILE_IMAGE $CONTAINER_LATEST_COMPILE_IMAGE
+    - docker push $CONTAINER_LATEST_COMPILE_IMAGE
+    - docker pull $CONTAINER_IMAGE
+    - docker tag $CONTAINER_IMAGE $CONTAINER_LATEST_IMAGE
+    - docker push $CONTAINER_LATEST_IMAGE
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_LATEST_TEST_IMAGE
+    - docker push $CONTAINER_LATEST_TEST_IMAGE
+  only:
+   - master

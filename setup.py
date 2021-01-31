@@ -14,13 +14,13 @@ setup(
     setup_requires=['setuptools_scm'],
     install_requires=[
         'aiodns>=2.0.0',
-        'aiohttp>=3.6.2',
-        'aiopg>=1.0.0',
-        'alembic>=1.4.2',
+        'aiohttp>=3.7.3',
+        'aiopg>=1.1.0',
+        'alembic>=1.5.3',
         'brotlipy>=0.7.0',
-        'cchardet>=2.1.5',
+        'cchardet>=2.1.7',
         'chardet>=3.0.4',
-        'SQLAlchemy>=1.3.16',
+        'SQLAlchemy>=1.3.22',
     ],
     entry_points={
         'console_scripts': [

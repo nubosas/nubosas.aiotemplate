@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: "aiotemplate"
       POSTGRES_PASSWORD: "aiotemplate"
       POSTGRES_DB: "aiotemplate"
-    image: postgres:12.2
+    image: postgres:13.1
     ports:
       - 5432:5432/tcp
 
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       target: build-image
-    command: ["/usr/local/bin/wait-for-it.sh", "aiotemplate-db:5432", "--", "nubosas-aiotemplate"]
+    command: ["/usr/local/bin/wait-for-it.sh", "aiotemplate-db:5432", "--", "/app/run_app.sh"]
     depends_on:
       - aiotemplate-db
     environment:

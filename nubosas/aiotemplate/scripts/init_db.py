@@ -1,4 +1,3 @@
-import os
 import asyncio
 from logging import getLogger
 
@@ -10,19 +9,11 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy import create_engine as sa_create_engine
 
 from ..models import Base, Test
+from ..settings import config
 
 LOG = getLogger(__name__)
 
-DATABASE = {
-    'drivername': 'postgres',
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': os.getenv('DB_PORT', '5432'),
-    'username': os.getenv('POSTGRES_USER', 'aiotemplate'),
-    'password': os.getenv('POSTGRES_PASSWORD', 'aiotemplate'),
-    'database': os.getenv('POSTGRES_DB', 'aiotemplate')
-}
-
-dsn = str(URL(**DATABASE))
+dsn = str(URL(**config['database']))
 
 
 async def populate():
@@ -37,12 +28,16 @@ async def populate():
 
 def run():
     LOG.info('recreating database and populating with initial data')
-    conn = psycopg2.connect(user=DATABASE['username'], password=DATABASE['password'],
-                            host=DATABASE['host'], port=DATABASE['port'], dbname="postgres")
+    conn = psycopg2.connect(
+        user=config['database']['username'],
+        password=config['database']['password'],
+        host=config['database']['host'],
+        port=config['database']['port'],
+        dbname="postgres")
     conn.autocommit = True
     cur = conn.cursor()
-    cur.execute('DROP DATABASE IF EXISTS {}'.format(DATABASE['database']))
-    cur.execute('CREATE DATABASE {}'.format(DATABASE['database']))
+    cur.execute('DROP DATABASE IF EXISTS {}'.format(config['database']['database']))
+    cur.execute('CREATE DATABASE {}'.format(config['database']['database']))
 
     engine = sa_create_engine(dsn)
     Base.metadata.create_all(engine)

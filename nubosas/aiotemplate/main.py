@@ -1,4 +1,4 @@
-from logging import getLogger
+from logging import DEBUG, basicConfig, getLogger
 
 from aiohttp import web
 from aiopg.sa import create_engine
@@ -31,5 +31,7 @@ def app():
 
 
 def run():
+    basicConfig(level=DEBUG)
+
     the_app = app()
     web.run_app(the_app)

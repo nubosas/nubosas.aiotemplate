@@ -13,9 +13,12 @@ async def health_check(request):
 
 
 async def list_view(request):
-    engine = request.app['engine']
     body = ''
-    async with engine.acquire() as conn:
-        async for row in conn.execute(Test.__table__.select()):
-            body += '<p>{}: {} | {}</p>\n'.format(row.id, row.field_1, row.field_2)
+
+    conn = await request.app['engine'].acquire()
+
+    proxy = await conn.execute(Test.__table__.select())
+
+    async for row in await proxy.fetchall():
+        body += '<p>{}: {} | {}</p>\n'.format(row.id, row.field_1, row.field_2)
     return web.Response(body=body.encode())

@@ -5,7 +5,7 @@
 #    pip-compile
 #
 aiodns==2.0.0             # via nubosas.aiotemplate (setup.py)
-aiohttp==3.7.3            # via nubosas.aiotemplate (setup.py)
+aiohttp==3.8.1            # via nubosas.aiotemplate (setup.py)
 aiopg==1.1.0              # via nubosas.aiotemplate (setup.py)
 alembic==1.5.3            # via nubosas.aiotemplate (setup.py)
 async-timeout==3.0.1      # via aiohttp

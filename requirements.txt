@@ -15,7 +15,7 @@ cchardet==2.1.7           # via nubosas.aiotemplate (setup.py)
 cffi==1.14.0              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, nubosas.aiotemplate (setup.py)
 idna==2.9                 # via yarl
-mako==1.1.2               # via alembic
+mako==1.2.2               # via alembic
 markupsafe==1.1.1         # via mako
 multidict==4.7.6          # via aiohttp, yarl
 psycopg2-binary==2.8.5    # via aiopg
